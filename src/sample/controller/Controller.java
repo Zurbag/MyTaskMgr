@@ -49,10 +49,10 @@ public class Controller {
     private Label getIdLabel;
     @FXML
     private Button showAllTasks;
-
     @FXML
     private Button editButton;
-
+    @FXML
+    private Button deleteButton;
 
     //ПОЛЯ ТАБЛИЦЫ
     @FXML
@@ -66,15 +66,11 @@ public class Controller {
     @FXML
     private TableColumn<Task, String> dateFinish;
 
-    // ФУТЕР
-    @FXML
-    private Button deleteButton;
 
-    //Переменная для хранненеия типа кнопки задач todayType, weekType, laterType;
+    //Переменная для хранненеия типа кнопки задач todayType, weekType, laterType, allType;
     //В зависимости от того какое значение подставляется так и происходит удаление после установки задачи
     //Заменит на пречисление позже
     String timePeriodTypeTasks = "todayType";
-
     //Переменная для храннения ID выбраной задачи
     int idTask;
     //Тут храняться задачи
@@ -111,14 +107,14 @@ public class Controller {
 
 
     }
-
-    //УСТАНОВИТЬ ДАТУ НОВОЙ ЗАДАЧИ
+    //НОВАЯ ЗАДАЧА
+    //Устанавливает дату окончания задачи
     @FXML
     void setNewTaskDataFinish(ActionEvent event) {
         setNewTaskDataFinishString = setNewTaskDataFinish.getValue().toString();
     }
 
-    //СОЗДАНИЕ НОВОЙ ЗАДАЧИ И ДОБАВЛЕНИЕ В БАЗУ
+    //Создание задачи и добавление в базу
     @FXML
     void addNewTaskInBDClick(ActionEvent event) {
 
@@ -135,8 +131,10 @@ public class Controller {
             nameTask = setNewTaskTextField.getText();
         }
 
+        //Получить сегодняшнюю дату это дата создания задачи
         String dataCreate = new GregorianCalendar().toZonedDateTime().format(DateTimeFormatter.ofPattern("uuuu-MM-d"));
 
+        //Дата окончания задачи
         String dataFinish;
         if (setNewTaskDataFinishString == null) {
             dataFinish = new GregorianCalendar().toZonedDateTime().format(DateTimeFormatter.ofPattern("uuuu-MM-d"));
@@ -144,7 +142,9 @@ public class Controller {
             dataFinish = setNewTaskDataFinishString;
         }
 
+        //Инициализируем дату передавая данные в конструктор
         Task task = new Task(true, nameTask, dataCreate, dataFinish);
+        //Складываем задачу в лист с задачаей
         tasksList.add(task);
         try {
             ConnectionBD connectionBD = new ConnectionBD();
@@ -170,6 +170,8 @@ public class Controller {
         setNewTaskTextField.clear();// Очистка текстового поля после добавления задачи
 
     }
+
+
 
     //ПОКАЗАТЬ СЕГОДНЯШНИЕ ЗАДАЧИ
     @FXML
@@ -259,6 +261,8 @@ public class Controller {
         }
     }
 
+
+    //РЕДАКТИРОВАНИЕ ЗАДАЧ
     @FXML
     void editButtonClick(ActionEvent event) throws IOException {
         editButtonMethod();
@@ -280,11 +284,7 @@ public class Controller {
                 task.setDateFinish(resultSet.getString("dateFinish"));//System.out.println(resultSet.getString("id"));
             }
 
-            //statement.executeUpdate("DELETE FROM `tasks` WHERE `id` = "+idTask+";");
-
-            //ЭКСПЕРЕМЕНТ С НОВЫМ ОКНОМ
-            //TextField statusField = new TextField(String.valueOf(task.isStatus()));
-            //TextField statusField = new TextField(String.valueOf(task.isStatus()));
+            //Создание окна для редактирования задач
             Button setStatusButton = new Button();
 
             if (task.isStatus()){
@@ -293,12 +293,8 @@ public class Controller {
                 setStatusButton.setText("Возобновить");
             }
 
-            //setStatusButton.setPrefWidth(50);
             TextField textField = new TextField(task.getName());
             textField.setPrefWidth(355);
-            //setNewTaskDataFinishString = setNewTaskDataFinish.getValue().toString();
-            //String dataCreate = new GregorianCalendar().toZonedDateTime().format(DateTimeFormatter.ofPattern("uuuu-MM-d"));
-            //setNewTaskDataFinish.setPromptText(new GregorianCalendar().toZonedDateTime().format(DateTimeFormatter.ofPattern("uuuu-MM-d")));
             DatePicker dateField = new DatePicker();
             dateField.setMinWidth(122);
             dateField.setPromptText(task.getDateFinish());
@@ -323,7 +319,7 @@ public class Controller {
                 try {
                     dateText  = dateField.getValue().toString();
                 }catch (NullPointerException exception){
-                    dateText = "2040-12-12";
+                    dateText = task.getDateFinish();
                 }
 
                 try {
